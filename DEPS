@@ -4,7 +4,7 @@ deps = {
             "url": "https://github.com/google/flatbuffers/archive/v1.8.0.zip",
             "hash": "ab03443a63bda19954dee6c72ac38d3af5b4579a",
             "headers": {
-                "srcs": ["//:get-flatbuffers"],
+                "srcs": [":get-flatbuffers"],
                 "dir": "flatbuffers-1.8.0/include"
             }
         },
@@ -13,7 +13,7 @@ deps = {
             "hash": "963d7782580d081d9fa5966cdca4a6d89ae0285a",
             "headers": {
                 "dir": "rapidxml-1.13",
-                "srcs": ["//:get-rapidxml"]
+                "srcs": [":get-rapidxml"]
             }
         }
     },
@@ -31,7 +31,7 @@ deps = {
             },
             "headers": {
                 "dir": "boost_1_66_0/include",
-                "srcs": ["//:build-boost"]
+                "srcs": [":build-boost"]
             },
             "libraries": [
                 {
@@ -48,7 +48,7 @@ deps = {
             "url": "https://github.com/google/snappy/archive/1.1.7.zip",
             "hash": "43d6626c62c961171b301eb934fd05fc26ae28a8",
             "headers": {
-                "srcs": ['//:get-snappy', '//:build-snappy'],
+                "srcs": [':get-snappy', ':build-snappy'],
             },
             "libraries": [{
                 "name": "libsnappy.a",
@@ -69,7 +69,7 @@ deps = {
             "url": "https://github.com/odict/lucy-clownfish/archive/rel/v0.6.2.zip",
             "hash": "c71da58ec77705a465202621f6686bf829ebfde5",
             "headers": {
-                "srcs": ['//:build-clownfish'],
+                "srcs": [':build-clownfish'],
                 "dir": "lucy-clownfish-rel-v0.6.2/runtime/c/autogen/include",
                 "rawcopy": True
             },
@@ -95,7 +95,7 @@ deps = {
             "url": "https://github.com/odict/lucy/archive/rel/v0.6.1.zip",
             "hash": "dc4305666f86ad99d5088e4f931ebf0c35d1a155",
             "headers": {
-                "srcs": ['//:build-lucy'],
+                "srcs": [':build-lucy'],
                 "dir": "get-lucy/lucy-rel-v0.6.1/c/autogen/include",
                 "rawcopy": True
             },
@@ -104,7 +104,7 @@ deps = {
                 "name": "liblucy.dylib"
             }],
             "build": {
-                "srcs": ['//:get-lucy', '//:build-clownfish'],
+                "srcs": [':get-lucy', ':build-clownfish'],
                 "cmd": [
                     "cp -r $SRCS/* $OUT",
                     "source $OUT/lucy-clownfish-rel-v0.6.2/devel/bin/setup_env.sh",

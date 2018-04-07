@@ -1,5 +1,7 @@
 include_defs('//DEPS')
 
+base_dir = "//src"
+
 def remote_headers(name, url, hash, headers_srcs, headers_dir = ""):
     remote_file(
         name = 'get-' + name,
@@ -18,7 +20,7 @@ def remote_headers(name, url, hash, headers_srcs, headers_dir = ""):
     prebuilt_cxx_library(
         name = name,
         header_only = True,
-        header_dirs = ['//:headers-' + name],
+        header_dirs = [base_dir + ':headers-' + name],
         visibility = ['PUBLIC']
     )
 
@@ -27,10 +29,10 @@ def remote_library(name, payload):
     url=payload["url"]
     hash=payload["hash"]
     headers_dir=payload["headers"].get("dir") or ""
-    headers_srcs=payload["headers"].get("srcs")
+    headers_srcs=map(lambda x: base_dir + x, payload["headers"].get("srcs"))
     headers_direct_copy=payload["headers"].get("rawcopy") or False
     libs=payload["libraries"]
-    build_srcs=payload["build"].get("srcs") or []
+    build_srcs=map(lambda x: base_dir + x, payload["build"].get("srcs") or [])
     build_cmd=" && ".join(payload["build"]["cmd"])
 
     remote_file(
@@ -42,7 +44,7 @@ def remote_library(name, payload):
 
     genrule(
         name = 'build-' + name,
-        srcs = ["//:get-" + name] if len(build_srcs) == 0 else build_srcs,
+        srcs = [base_dir + ":get-" + name] if len(build_srcs) == 0 else build_srcs,
         cmd = build_cmd,
         out = '.'
     )
@@ -51,7 +53,8 @@ def remote_library(name, payload):
         name = 'headers-' + name,
         srcs = headers_srcs,
         cmd = 'cp -r $SRCS/' + headers_dir + '/* $OUT' if headers_direct_copy else 'find $SRCS/' + headers_dir + ' -name *.h -o -name *.hpp | xargs -I FILE cp FILE $OUT',
-        out = '.'
+        out = '.',
+        visibility = ['//src/test:libodict-tests']
     )
 
     for idx, lib in enumerate(libs):
@@ -60,17 +63,25 @@ def remote_library(name, payload):
 
         genrule(
             name = 'lib-' + name + str(idx),
-            srcs = [':build-' + name],
+            srcs = [base_dir + ':build-' + name],
             cmd = 'cp $SRCS/' + lib_dir + '/' + lib_name + ' $OUT',
             out = lib_name
         )
 
         prebuilt_cxx_library(
             name = name + str(idx),
-            header_dirs = ['//:headers-' + name],
-            static_lib = '//:lib-' + name + str(idx),
+            header_dirs = [base_dir + ':headers-' + name],
+            static_lib = base_dir + ':lib-' + name + str(idx),
             visibility = ['PUBLIC']
         )
+
+def dependency_headers():
+    all_libs = deps["headers"].copy()
+    all_libs.update(deps["libraries"])
+    headers = []
+    for dep in all_libs:
+        headers.append(base_dir + ':headers-' + dep)
+    return headers
 
 def generate_deps():
     header_libs = deps["headers"]
@@ -79,19 +90,19 @@ def generate_deps():
 
     for dep in header_libs:
         d = header_libs[dep]
-        all_deps.append("//:" + dep)
+        all_deps.append(base_dir + ":" + dep)
         remote_headers(
             name=dep,
             url=d["url"],
             hash=d["hash"],
             headers_dir=d["headers"]["dir"],
-            headers_srcs=d["headers"]["srcs"]
+            headers_srcs=map(lambda x: base_dir + x, d["headers"]["srcs"])
         )
 
     for dep in compiled_libs:
         d = compiled_libs[dep]
         for idx, lib in enumerate(d.get("libraries")):
-            all_deps.append("//:" + dep + str(idx))
+            all_deps.append(base_dir + ":" + dep + str(idx))
         remote_library(dep, d)
 
     return all_deps

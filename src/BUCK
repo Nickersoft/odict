@@ -1,0 +1,27 @@
+include_defs('//DEFS')
+
+# Install & Build GTest
+remote_file(name = 'get-gtest', url = 'https://github.com/google/googletest/archive/release-1.8.0.zip', sha1 = '667f873ab7a4d246062565fad32fb6d8e203ee73', type = 'exploded_zip')
+genrule(name = 'build-gtest', srcs = [':get-gtest'], cmd = 'cd $SRCS/googletest-release-1.8.0/googletest && cmake . && make && cp -r ./libgtest.a ./include $OUT', out = '.')
+genrule(name = 'headers-gtest', srcs = [':build-gtest'], cmd = 'cp -r $SRCS/include/* $OUT', out = '.')
+genrule(name = 'lib-gtest', srcs = [':build-gtest'], cmd = 'cp $SRCS/libgtest.a $OUT', out = 'libgtest.a')
+prebuilt_cxx_library(name = 'gtest', header_dirs = [':headers-gtest'], exported_headers = [':headers-gtest'], static_lib = ':lib-gtest', visibility = ['PUBLIC'])
+
+# Test Entrypoint
+cxx_test(
+  name = 'libodict-tests',
+  srcs = glob(['tests/**/*.cpp']),
+  headers = glob(['tests/**/*.h']),
+  deps = [':libodict']
+)
+
+# The ODict Library
+cxx_library(
+  name = 'libodict',
+  soname = 'odict',
+  header_namespace = 'ODict',
+  exported_headers = glob(['**/*.h']),
+  srcs = glob(['**/*.cpp']),
+  deps = generate_deps(),
+  visibility = ['PUBLIC']
+)

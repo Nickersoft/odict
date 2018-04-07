@@ -4,6 +4,7 @@
 [cxx]
     cxxflags = -std=c++14
     enable_deprecated_prebuilt_cxx_library_api = true
+    gtest_dep = //src:gtest
 
 [httpserver]
     port = 0

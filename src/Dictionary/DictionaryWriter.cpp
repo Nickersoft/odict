@@ -116,10 +116,10 @@ Offset<Vector<Offset<Group>>> DictionaryWriter::get_groups(xml_node<> *usage_nod
         string description = get_attribute_if_exists(current_group, ATTR_DESCRIPTION);
 
         groups.push_back(CreateGroup(
-                builder,
-                count,
-                builder.CreateString(description),
-                this->get_definitions(current_group)
+            builder,
+            count,
+            builder.CreateString(description),
+            this->get_definitions(current_group)
         ));
 
         count++;
@@ -139,10 +139,10 @@ Offset<Vector<Offset<Etymology>>> DictionaryWriter::get_etymologies(xml_node<> *
         auto usages = this->get_usages(current_ety);
 
         etymologies.push_back(CreateEtymology(
-                builder,
-                count,
-                builder.CreateString(description),
-                usages
+            builder,
+            count,
+            builder.CreateString(description),
+            usages
         ));
 
         count++;
@@ -198,7 +198,14 @@ Offset<Vector<Offset<Entry>>> DictionaryWriter::get_entries(xml_node<> *dictiona
     while (current_entry != 0) {
         string term = get_attribute_if_exists(current_entry, ATTR_TERM);
         auto etymologies = this->get_etymologies(current_entry);
-        entries.push_back(CreateEntry(builder, count, builder.CreateString(term), etymologies));
+
+        entries.push_back(CreateEntry(
+            builder,
+            count,
+            builder.CreateString(term),
+            etymologies
+        ));
+
         count++;
         current_entry = current_entry->next_sibling(NODE_ENTRY);
         cout << "\r" << setw(total_d) << right << count << " / " << setw(total_d) << left << total << " words processed" << flush;
@@ -271,10 +278,10 @@ void DictionaryWriter::generate(const char *input_file, const char *output_file)
         // 4) Get all of the entries (and children) from the dictionary root
         auto entries = this->get_entries(dictionary_node);
         auto dictionary = CreateDictionary(
-                builder,
-                this->get_uuid_string(),
-                builder.CreateString(get_attribute_if_exists(dictionary_node, "name")),
-                entries
+            builder,
+            this->get_uuid_string(),
+            builder.CreateString(get_attribute_if_exists(dictionary_node, "name")),
+            entries
         );
 
         // 5) Make the dictionary and store it in a buffer
@@ -283,6 +290,8 @@ void DictionaryWriter::generate(const char *input_file, const char *output_file)
         // 6) Get the buffer and its size
         uint8_t *buf = builder.GetBufferPointer();
         int size = builder.GetSize();
+
+        cout << size << endl;
 
         // 7) Write the output to disk
         this->output_compressed_buffer(buf, size, output_file);
