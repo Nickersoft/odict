@@ -81,7 +81,7 @@ const uint8_t *DictionaryReader::get_buffer(const char *path) {
         printf("File built with ODict v%d.0\n", version);
         printf("Decompressed dictionary from %lu bytes to %lu\n", compressed_size, size);
 
-        Verifier verifier = Verifier(buf, size);
+        Verifier verifier = Verifier(buf, size, 100, 20000000);
         return (VerifyDictionaryBuffer(verifier)) ? buf : 0;
     } else {
         cout << "Compressed data is corrupted. Could not decompress." << endl;
@@ -134,6 +134,7 @@ const void DictionaryReader::generate_index(const Dictionary* dict) {
         builder->add_document(entry->term()->c_str(), keyword_block.c_str());
         entry++;
     }
+
     builder->build();
 }
 

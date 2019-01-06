@@ -224,7 +224,7 @@ Offset<Vector<Offset<Entry>>> DictionaryWriter::get_entries(xml_node<> *dictiona
  * @return
  */
 bool DictionaryWriter::output_compressed_buffer(uint8_t *buf, int size, const char *output_file) {
-    Verifier verifier = Verifier(buf, size);
+    Verifier verifier = Verifier(buf, size, 100, 20000000);
 
     if (VerifyDictionaryBuffer(verifier)) {
         string compressed_str;

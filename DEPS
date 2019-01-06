@@ -66,7 +66,7 @@ deps = {
             }
         },
         "clownfish": {
-            "url": "https://github.com/odict/lucy-clownfish/archive/rel/v0.6.2.zip",
+            "url": "https://github.com/apache/lucy-clownfish/archive/rel/v0.6.2.zip",
             "hash": "c71da58ec77705a465202621f6686bf829ebfde5",
             "headers": {
                 "srcs": [':build-clownfish'],
