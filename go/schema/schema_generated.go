@@ -139,6 +139,7 @@ func EtymologyStartUsagesVector(builder *flatbuffers.Builder, numElems int) flat
 func EtymologyEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()
 }
+
 type Group struct {
 	_tab flatbuffers.Table
 }
@@ -210,6 +211,7 @@ func GroupStartDefinitionsVector(builder *flatbuffers.Builder, numElems int) fla
 func GroupEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()
 }
+
 type Usage struct {
 	_tab flatbuffers.Table
 }
@@ -300,6 +302,7 @@ func UsageStartGroupsVector(builder *flatbuffers.Builder, numElems int) flatbuff
 func UsageEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()
 }
+
 type Entry struct {
 	_tab flatbuffers.Table
 }
@@ -326,6 +329,46 @@ func (rcv *Entry) Term() []byte {
 		return rcv._tab.ByteVector(o + rcv._tab.Pos)
 	}
 	return nil
+}
+
+func (rcv *Entry) LookupByKey(vector flatbuffers.UOffsetT, key string, fbb []byte) {
+	byteKey := []byte(key)
+	span := flatbuffers.GetUOffsetT(fbb[vector-4:])
+	start := 0
+
+	for span != 0 {
+		middle := span / 2
+		tableOffset := rcv._tab.Indirect(vector + 4*(start+middle))
+		comp := rcv._tab.Offset(4)
+
+		if comp > 0 {
+			span = middle 
+		} else if (comp < 0) {
+			middle++;
+			start += middle;
+			span -= middle;
+		} else {
+			return {}Entry.in
+		}
+	}
+	// byte[] byteKey = key.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+	// int span = bb.getInt(vectorLocation - 4);
+	// int start = 0;
+	// while (span != 0) {
+	// 	int middle = span / 2;
+	// 	int tableOffset = __indirect(vectorLocation + 4 * (start + middle), bb);
+	// 	int comp = compareStrings(__offset(4, bb.capacity() - tableOffset, bb), byteKey, bb);
+	// 	if (comp > 0) {
+	// 		span = middle;
+	// 	} else if (comp < 0) {
+	// 		middle++;
+	// 		start += middle;
+	// 		span -= middle;
+	// 	} else {
+	// 		return (obj == null ? new Entry() : obj).__assign(tableOffset, bb);
+	// 	}
+	// }
+	// return null;
 }
 
 func (rcv *Entry) Etymologies(obj *Etymology, j int) bool {
@@ -363,6 +406,7 @@ func EntryStartEtymologiesVector(builder *flatbuffers.Builder, numElems int) fla
 func EntryEnd(builder *flatbuffers.Builder) flatbuffers.UOffsetT {
 	return builder.EndObject()
 }
+
 type Dictionary struct {
 	_tab flatbuffers.Table
 }
